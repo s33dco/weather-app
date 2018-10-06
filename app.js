@@ -2,32 +2,25 @@ if (process.env.NODE_ENV !== 'production') {
   require('dotenv').load();
 }
 
-const request = require('request');
-const yargs = require('yargs');
+const yargs 	= require('yargs');
+const geocode = require('./geocode/geocode');
+const argv 		= yargs
+								.options({
+									a: {
+										demand: true,
+										alias: 'address',
+										describe: 'Address to fetch weather for',
+										string: true
+									}
+								})
+								.help()
+								.alias('help', 'h')
+								.argv;
 
-const argv = yargs
-	.options({
-		a: {
-			demand: true,
-			alias: 'address',
-			describe: 'Address to fetch weather for',
-			string: true
-		}
-	})
-	.help()
-	.alias('help', 'h')
-	.argv;
-
-// console.log(argv);
-
-let addressInput = encodeURIComponent(argv.address);
-
-request({
-	url: `https://maps.googleapis.com/maps/api/geocode/json?key=${process.env.MAP_API_KEY}&address=${addressInput}`,
-	json: true
-}, (error, response, body) => {
-	// console.log(JSON.stringify(body, undefined, 2));
-	console.log(`Address: ${body.results[0].formatted_address}`);
-	console.log(`Latitude: ${body.results[0].geometry.location.lat}`);
-	console.log(`Longitude: ${body.results[0].geometry.location.lng}`);
+geocode.geocodeAddress(argv.address, (errorMessage, results) => {
+	if (errorMessage) {
+		console.log(errorMessage);
+	} else {
+		console.log(JSON.stringify(results, undefined, 2));
+	}
 });
