@@ -1,6 +1,7 @@
 const request = require('request');
 
 let geocodeAddress = (address, callback) => {
+
 	let encodedAddress = encodeURIComponent(address);
 
 	request({
@@ -14,11 +15,16 @@ let geocodeAddress = (address, callback) => {
 		} else if ( body.status === 'OK') {
 			callback(undefined, {
 				address: body.results[0].formatted_address,
-				Latitude: body.results[0].geometry.location.lat,
-				Longitude: body.results[0].geometry.location.lng
+				latitude: body.results[0].geometry.location.lat,
+				longitude: body.results[0].geometry.location.lng
 			});
 		}
 	});
+	
 };
 
 module.exports.geocodeAddress = geocodeAddress;
+
+//  2e868da52b83f0636ddfeea93ea0c3be
+
+
