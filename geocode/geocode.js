@@ -20,11 +20,6 @@ let geocodeAddress = (address, callback) => {
 			});
 		}
 	});
-	
 };
 
 module.exports.geocodeAddress = geocodeAddress;
-
-//  2e868da52b83f0636ddfeea93ea0c3be
-
-

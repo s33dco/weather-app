@@ -29,16 +29,8 @@ geocode.geocodeAddress(argv.address, (errorMessage, results) => {
 					console.log(errorMessage);
 				} else {
 					console.log(JSON.stringify(weatherResults, undefined, 2));
-					console.log(`It's ${weatherResults.summary} ${weatherResults.temperature} deegrees, feeling like ${weatherResults.apparentTemperature}.`);
+					console.log(`It's ${weatherResults.summary} and ${weatherResults.temperature} deegrees, feeling like ${weatherResults.apparentTemperature}.`);
 				}
 		});
 	}
 });
-
-
-// lat, long, callback
-
-
-
-
-
