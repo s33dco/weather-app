@@ -2,35 +2,42 @@ if (process.env.NODE_ENV !== 'production') {
   require('dotenv').load();
 }
 
-const yargs 	= require('yargs');
-const geocode = require('./geocode/geocode');
-const weather = require('./weather/weather');
+const yargs = require('yargs');
+const axios = require('axios');
+const argv  = yargs
+							.options({
+								a: {
+									demand: true,
+									alias: 'address',
+									describe: 'Address to fetch weather for',
+									string: true
+								}
+							})
+							.help()
+							.alias('help', 'h')
+							.argv;
 
-const argv 		= yargs
-								.options({
-									a: {
-										demand: true,
-										alias: 'address',
-										describe: 'Address to fetch weather for',
-										string: true
-									}
-								})
-								.help()
-								.alias('help', 'h')
-								.argv;
+let encodedAddress = encodeURIComponent(argv.address);
+let geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?key=${process.env.MAP_API_KEY}&address=${encodedAddress}`;
 
-geocode.geocodeAddress(argv.address, (errorMessage, results) => {
-	if (errorMessage) {
-		console.log(errorMessage);
+axios.get(geocodeUrl, {timeout: 5000}).then((response) => {
+	if (response.data.status === 'ZERO_RESULTS') {
+		throw new Error('Unable to find that address.');
+	}
+	let lat = response.data.results[0].geometry.location.lat;
+	let lng = response.data.results[0].geometry.location.lng;
+	let weatherUrl = `https://api.darksky.net/forecast/${process.env.WEATHER_API_KEY}/${lat},${lng}?units=uk2&exclude=minutely,hourly,daily,alerts`;
+	console.log(`\nNow in ${response.data.results[0].formatted_address}`);
+	return axios.get(weatherUrl);
+}).then((response) => {
+		let temperature 				= response.data.currently.temperature;
+		let apparentTemperature = response.data.currently.apparentTemperature;
+		let summary							=	response.data.currently.summary;
+		console.log(`It's ${summary} and ${temperature} deegrees, feeling like ${apparentTemperature}.\n`);
+}).catch((e) => {
+	if (e.code === 'ENOTFOUND') {
+		console.log('could not connect to api servers.');
 	} else {
-		console.log(results.address);
-		weather.getWeather(results.latitude, results.longitude,(errorMessage, weatherResults) => {
-				if (errorMessage) {
-					console.log(errorMessage);
-				} else {
-					console.log(JSON.stringify(weatherResults, undefined, 2));
-					console.log(`It's ${weatherResults.summary} and ${weatherResults.temperature} deegrees, feeling like ${weatherResults.apparentTemperature}.`);
-				}
-		});
+		console.log(e.message);
 	}
 });

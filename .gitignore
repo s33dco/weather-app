@@ -7,3 +7,6 @@
 # misc
 .DS_Store
 .env
+
+# 
+app-promise.js
